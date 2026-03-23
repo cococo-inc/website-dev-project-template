@@ -45,7 +45,7 @@ export default async function NewsDetailPage({ params }: Props) {
           </Link>
           <span>/</span>
           <Link href="/news" className="hover:text-[var(--color-primary)] transition-colors">
-            お知らせ
+            お知らせ（お知らせ）
           </Link>
           <span>/</span>
           <span className="text-gray-800 line-clamp-1">{news.title}</span>
