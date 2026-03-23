@@ -20,10 +20,15 @@ export async function getNewsList(limit = 10, offset = 0): Promise<MicroCMSListR
     const contents = mockNews.slice(offset, offset + limit);
     return { contents, totalCount: mockNews.length, offset, limit };
   }
-  return client.getList<News>({
-    endpoint: "news",
-    queries: { limit, offset, orders: "-publishedAt" },
-  });
+  try {
+    return await client.getList<News>({
+      endpoint: "news",
+      queries: { limit, offset, orders: "-publishedAt" },
+    });
+  } catch {
+    const contents = mockNews.slice(offset, offset + limit);
+    return { contents, totalCount: mockNews.length, offset, limit };
+  }
 }
 
 export async function getNewsDetail(id: string): Promise<News> {
@@ -32,7 +37,13 @@ export async function getNewsDetail(id: string): Promise<News> {
     if (!news) throw new Error(`News not found: ${id}`);
     return news;
   }
-  return client.getListDetail<News>({ endpoint: "news", contentId: id });
+  try {
+    return await client.getListDetail<News>({ endpoint: "news", contentId: id });
+  } catch {
+    const news = mockNews.find((n) => n.id === id);
+    if (!news) throw new Error(`News not found: ${id}`);
+    return news;
+  }
 }
 
 // --- サービス ---
@@ -41,10 +52,14 @@ export async function getServicesList(): Promise<MicroCMSListResponse<Service>> 
   if (!client) {
     return { contents: mockServices, totalCount: mockServices.length, offset: 0, limit: 100 };
   }
-  return client.getList<Service>({
-    endpoint: "services",
-    queries: { limit: 100, orders: "order" },
-  });
+  try {
+    return await client.getList<Service>({
+      endpoint: "services",
+      queries: { limit: 100, orders: "order" },
+    });
+  } catch {
+    return { contents: mockServices, totalCount: mockServices.length, offset: 0, limit: 100 };
+  }
 }
 
 // --- 会社情報（シングルトン想定） ---
@@ -53,8 +68,16 @@ export async function getCompanyInfo(): Promise<CompanyInfo> {
   if (!client) {
     return mockCompanyInfo;
   }
-  // microCMS のオブジェクト形式 API を使う場合
-  return client.get<CompanyInfo>({ endpoint: "company" });
+  try {
+    const data = await client.get<CompanyInfo>({ endpoint: "company" });
+    return {
+      ...mockCompanyInfo,
+      ...data,
+      strengths: Array.isArray(data.strengths) ? data.strengths : mockCompanyInfo.strengths,
+    };
+  } catch {
+    return mockCompanyInfo;
+  }
 }
 
 // 日付フォーマット
