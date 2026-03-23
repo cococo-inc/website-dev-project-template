@@ -44,7 +44,7 @@ export default async function AboutPage() {
             私たちの強み
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {company.strengths.map((strength, index) => (
+            {(company.strengths ?? []).map((strength, index) => (
               <div
                 key={index}
                 className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm text-center"
